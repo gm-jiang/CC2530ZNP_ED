@@ -304,7 +304,7 @@
           <name>CCDefines</name>
           <state>FEATURE_SYSTEM_STATS</state>
           <state>POWER_SAVING</state>
-          <state>xTC_LINKKEY_JOIN</state>
+          <state>TC_LINKKEY_JOIN</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -344,7 +344,7 @@
         </option>
         <option>
           <name>CCDiagSuppress</name>
-          <state>Pe001,Pa010</state>
+          <state>Pe001,Pa010,Pa050</state>
         </option>
         <option>
           <name>CCDiagRemark</name>
