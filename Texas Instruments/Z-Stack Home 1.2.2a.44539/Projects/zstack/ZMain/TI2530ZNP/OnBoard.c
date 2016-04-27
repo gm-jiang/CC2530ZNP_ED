@@ -142,7 +142,7 @@ void InitBoard( uint8 level )
     // Check for Brown-Out reset
     ChkReset();
 
-#if defined CC2531ZNP
+/*#if defined CC2531ZNP
     znpCfg1 = ZNP_CFG1_UART;
 #elif defined CC2530_MK
     znpCfg1 = ZNP_CFG1_SPI;
@@ -153,7 +153,9 @@ void InitBoard( uint8 level )
     // Tri-state the 2 CFG inputs after being read (see hal_board_cfg_xxx.h for CFG0.)
     P1INP |= BV(2);
     P2INP |= BV(0);
-#endif
+#endif*/
+    znpCfg1 = ZNP_CFG1_SPI;
+    znpCfg0 = ZNP_CFG0_32K_XTAL;
   }
   else  // !OB_COLD
   {

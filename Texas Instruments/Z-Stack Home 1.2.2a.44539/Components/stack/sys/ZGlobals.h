@@ -264,7 +264,7 @@ extern "C" {
 // Value used by END DEVICE when sending End Device Timeout Request
 // This is an index into table timeoutValue[] defined in nwk_globals.c
 #if !defined ( END_DEV_TIMEOUT_VALUE )
-  #define END_DEV_TIMEOUT_VALUE   8   // Default value per ZigBee core specification
+  #define END_DEV_TIMEOUT_VALUE   0   // Default value per ZigBee core specification
 #endif
 
 // Value used by END DEVICE when sending End Device Timeout Request

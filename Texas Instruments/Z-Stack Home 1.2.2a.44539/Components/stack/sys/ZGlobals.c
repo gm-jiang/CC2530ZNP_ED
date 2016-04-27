@@ -159,7 +159,7 @@ uint8 zgNwkLeaveRequestAllowed = TRUE;
 // End device built with Child Table Aging support both methods, the method is
 // determined by the parent and communicated at run-time.
 #if ( ZG_BUILD_ENDDEVICE_TYPE )
-uint8 zgNwkParentInformation = NWK_PARENT_INFO_UNDEFINED;
+uint8 zgNwkParentInformation = NWK_PARENT_INFO_MAC_DATA_POLL;
 #else
 uint8 zgNwkParentInformation = NWK_PARENT_INFO_ORPHAN_NOTIFICATION;
 #endif
@@ -183,7 +183,7 @@ uint32 zgEndDeviceKAInterval = 0;
 //
 // NOTICE:  Before enabling Child Aging make sure to review all the related
 // definitions in this file, especially zgNwkParentInformation.
-uint8 zgChildAgingEnable = FALSE;
+uint8 zgChildAgingEnable = TRUE;
 
 /*********************************************************************
  * APS GLOBAL VARIABLES
