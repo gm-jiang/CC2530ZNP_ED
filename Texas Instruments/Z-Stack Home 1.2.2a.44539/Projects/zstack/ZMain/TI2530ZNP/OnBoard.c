@@ -156,6 +156,10 @@ void InitBoard( uint8 level )
 #endif*/
     znpCfg1 = ZNP_CFG1_SPI;
     znpCfg0 = ZNP_CFG0_32K_XTAL;
+
+    P0SEL = 0x00; P0DIR = 0x00; P0INP &= ~0xFF;
+    P1SEL = 0x00; P1DIR = 0x00; P1INP &= ~0xFF;
+    P2SEL = 0x00; P2DIR = 0x00; P2INP &= ~0xFF;
   }
   else  // !OB_COLD
   {
