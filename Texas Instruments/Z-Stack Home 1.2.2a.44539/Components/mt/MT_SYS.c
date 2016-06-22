@@ -51,6 +51,7 @@
 #include "mac_low_level.h"
 #include "ZMAC.h"
 #include "MT_UART.h"
+#include "ZDApp.h"
 
 #if !defined( CC26XX )
   #include "hal_adc.h"
@@ -480,7 +481,7 @@ static void MT_SysPing(void)
   /* Build Capabilities */
   tmp16 = MT_CAP_SYS | MT_CAP_MAC  | MT_CAP_NWK  | MT_CAP_AF    |
           MT_CAP_ZDO | MT_CAP_SAPI | MT_CAP_UTIL | MT_CAP_DEBUG |
-          MT_CAP_APP | MT_CAP_GP   | MT_CAP_ZOAD;
+          MT_CAP_APP | MT_CAP_GP   | MT_CAP_ZOAD | ((uint16)devState<<12);
 
   /* Convert to high byte first into temp buffer */
   retArray[0] = LO_UINT16( tmp16 );
