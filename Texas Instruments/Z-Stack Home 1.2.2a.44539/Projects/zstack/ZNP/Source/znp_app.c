@@ -110,6 +110,27 @@ uint8 znpCfg0;
 extern uint8 zcl_TaskID;
 #endif
 
+SimpleDescriptionFormat_t lock_simple_desc =
+{
+    LOCK_END_POINT_NUM,       //  int Endpoint;
+    LOCK_APP_PROFILE_ID,      //  uint16 AppProfId[2];
+    LOCK_APP_DEVICE_ID,       //  uint16 AppDeviceId[2];
+    0x01,                     //  int   AppDevVer:4;
+    0x00,                     //  int   AppFlags:4;
+    0,      //  byte  AppNumInClusters;
+    NULL,   //  byte *pAppInClusterList;
+    0,      //  byte  AppNumInClusters;
+    NULL    //  byte *pAppInClusterList;
+};
+
+static endPointDesc_t lock_ep =
+{
+    LOCK_END_POINT_NUM,
+    &znpTaskId,
+    &lock_simple_desc,
+    (afNetworkLatencyReq_t)0            // No Network Latency req
+};
+
 /**************************************************************************************************
  * @fn          znpInit
  *
@@ -129,6 +150,7 @@ extern uint8 zcl_TaskID;
 void znpInit(uint8 taskId)
 {
   znpTaskId = taskId;
+  afRegister(&lock_ep);
   (void)osal_set_event(taskId, ZNP_SECONDARY_INIT_EVENT);
 #if defined MT_ZNP_FUNC
   znpBasicRspRate = ZNP_BASIC_RSP_RATE;

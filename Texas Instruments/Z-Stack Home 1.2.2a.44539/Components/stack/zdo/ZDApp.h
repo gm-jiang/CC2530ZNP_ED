@@ -137,6 +137,7 @@ extern "C"
 #if !defined NUM_DISC_ATTEMPTS
 #define NUM_DISC_ATTEMPTS           2
 #endif
+#define NUM_REJOIN_ATTEMPTS         10
 
 // ZDOInitDevice return values
 #define ZDO_INITDEV_RESTORED_NETWORK_STATE      0x00

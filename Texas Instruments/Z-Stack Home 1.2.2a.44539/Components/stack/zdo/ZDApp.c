@@ -285,7 +285,7 @@ uint32 ZDApp_SavedPollRate = POLL_RATE;
 ZDAppNewDevice_t *ZDApp_NewDeviceList = NULL;
 
 /* "Hold Key" status saved during ZDAppCheckForHoldKey() */
-static uint8 zdappHoldKeys;
+//static uint8 zdappHoldKeys;
 
 /*********************************************************************
  * @fn      ZDApp_Init
@@ -1289,10 +1289,24 @@ void ZDApp_ProcessOSALMsg( osal_event_hdr_t *msgPtr )
         {
           if ( continueJoining )
           {
+            zdoDiscCounter++;
+            if (devStartMode == MODE_REJOIN
+                && zdoDiscCounter > NUM_REJOIN_ATTEMPTS)
+            {
+              /*devStartMode = MODE_JOIN;
+              osal_memset(ZDO_UseExtendedPANID, 0, Z_EXTADDR_LEN );
+              zdoDiscCounter = 1;
+              // Clear the neighbor Table and network discovery tables.
+              nwkNeighborInitTable();
+              NLME_NwkDiscTerm();*/
+              // Set the NV startup option to force a "new" join.
+              zgWriteStartupOptions( ZG_STARTUP_SET, ZCD_STARTOPT_DEFAULT_NETWORK_STATE );
+              SystemResetSoft();
+            }
+
 #if defined ( MANAGED_SCAN )
             ZDApp_NetworkInit( MANAGEDSCAN_DELAY_BETWEEN_SCANS );
 #else
-            zdoDiscCounter++;
             ZDApp_NetworkInit( (uint16)(BEACON_REQUEST_DELAY
                                         + ((uint16)(osal_rand()& BEACON_REQ_DELAY_MASK))) );
 #endif

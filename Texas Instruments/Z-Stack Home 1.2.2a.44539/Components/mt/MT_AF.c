@@ -625,6 +625,7 @@ static void MT_AfInterPanCtl(uint8 *pBuf)
  ***************************************************************************************************/
 void MT_AfDataConfirm(afDataConfirm_t *pMsg)
 {
+#if 0
   uint8 retArray[3];
 
   retArray[0] = pMsg->hdr.status;
@@ -633,6 +634,7 @@ void MT_AfDataConfirm(afDataConfirm_t *pMsg)
 
   /* Build and send back the response */
   MT_BuildAndSendZToolResponse(((uint8)MT_RPC_CMD_AREQ | (uint8)MT_RPC_SYS_AF), MT_AF_DATA_CONFIRM, 3, retArray);
+#endif
 }
 
 /***************************************************************************************************

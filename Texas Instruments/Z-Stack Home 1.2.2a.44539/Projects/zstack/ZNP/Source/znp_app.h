@@ -56,6 +56,10 @@ extern "C" {
  * ------------------------------------------------------------------------------------------------
  */
 
+#define LOCK_APP_PROFILE_ID  0x0104 /*app profile, use manufacturer-specific profile*/
+#define LOCK_END_POINT_NUM  0x08
+#define LOCK_APP_DEVICE_ID  0x01
+
 #define ZNP_SPI_RX_AREQ_EVENT     0x4000
 #define ZNP_SPI_RX_SREQ_EVENT     0x2000
 #define ZNP_UART_TX_READY_EVENT   0x1000

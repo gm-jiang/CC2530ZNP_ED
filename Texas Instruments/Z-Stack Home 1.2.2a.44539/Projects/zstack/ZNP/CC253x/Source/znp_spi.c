@@ -197,6 +197,9 @@ static uint8 npSpiBuf[NP_SPI_BUF_LEN];
 
 static volatile spiState_t npSpiState;
 
+static volatile uint8 spiIsStart = FALSE;
+static volatile uint32 spiRxWaitTime = 0;
+static volatile uint32 spiSrdyHighLevelTime = 0;
 /* ------------------------------------------------------------------------------------------------
  *                                           Local Functions
  * ------------------------------------------------------------------------------------------------
@@ -422,6 +425,8 @@ void npSpiInit(void)
  */
 void npSpiMonitor(void)
 {
+  halIntState_t his;
+
   if (ZNP_CFG1_UART == znpCfg1)
   {
     return;
@@ -438,7 +443,7 @@ void npSpiMonitor(void)
   switch (npSpiState)
   {
   case NP_SPI_IDLE:
-    NP_SPI_ASSERT((P1IFG & NP_RDYIn_BIT) == 0);
+    //NP_SPI_ASSERT((P1IFG & NP_RDYIn_BIT) == 0);
     break;
 
 #if defined POWER_SAVING
@@ -450,20 +455,65 @@ void npSpiMonitor(void)
 #endif        
 
   case NP_SPI_WAIT_RX:
-    NP_SPI_ASSERT((HAL_DMA_CHECK_IRQ(HAL_DMA_CH_RX)) == 0);
+    //NP_SPI_ASSERT((HAL_DMA_CHECK_IRQ(HAL_DMA_CH_RX)) == 0);
     break;
 
   case NP_SPI_WAIT_TX:
-    NP_SPI_ASSERT((HAL_DMA_CHECK_IRQ(HAL_DMA_CH_TX)) == 0);
+    //NP_SPI_ASSERT((HAL_DMA_CHECK_IRQ(HAL_DMA_CH_TX)) == 0);
     break;
 
   case NP_SPI_WAIT_AREQ:
     break;
 
   default:
-    NP_SPI_ASSERT(0);
+    //NP_SPI_ASSERT(0);
     break;
   }
+
+  /*in case exception, if zap has finished the transfer, znp should turn to idle*/
+  if (NP_RDYIn == 0)
+  {
+    spiIsStart = TRUE;
+  }
+  else
+  {
+    if (spiIsStart)
+    {
+      spiIsStart = FALSE;
+      npSpiState = NP_SPI_IDLE;
+    }
+  }
+
+  /*possibly if zap received a SRDY interrupt right before enter sleep, the interrupt would be processed after wakeup*/
+  /*so, in AREQ RX state, trigger a SRDY falling edge interrutp every 1s if zap doesn't read*/
+  HAL_ENTER_CRITICAL_SECTION(his);
+  if (npSpiState == NP_SPI_WAIT_RX && NP_RDYIn == 1)
+  {
+    if (spiRxWaitTime == 0)//start 1000ms timer for triggering SRDY falling edge
+    {
+      spiRxWaitTime = osal_GetSystemClock();
+    }
+    else if (spiSrdyHighLevelTime > 0)
+    {
+      if (osal_GetSystemClock() - spiSrdyHighLevelTime > 10)
+      {
+        spiSrdyHighLevelTime = 0;
+        spiRxWaitTime = osal_GetSystemClock();
+        NP_RDYOut = 0;
+      }
+    }
+    else if (osal_GetSystemClock() - spiRxWaitTime > 1000)
+    {
+      /*pull SRDY high for 10ms*/
+      spiSrdyHighLevelTime = osal_GetSystemClock();
+      NP_RDYOut = 1;
+    }
+  }
+  else
+  {
+    spiRxWaitTime = 0;
+  }
+  HAL_EXIT_CRITICAL_SECTION(his);
 
   if (npSpiState == NP_SPI_IDLE)
   {
@@ -479,8 +529,6 @@ void npSpiMonitor(void)
   }
   else
   {
-    halIntState_t his;
-
     HAL_ENTER_CRITICAL_SECTION(his);
     if (((npSpiState == NP_SPI_WAIT_RX) &&
         (!HAL_DMA_CH_ARMED(HAL_DMA_CH_RX) && !HAL_DMA_CHECK_IRQ(HAL_DMA_CH_RX)))
@@ -883,6 +931,8 @@ HAL_ISR_FUNCTION(port0Isr, P0INT_VECTOR)
     }
     else
     {
+      spiIsStart = TRUE;
+      spiRxWaitTime = 0;
       npSpiMrdyIsr();
     }
   }

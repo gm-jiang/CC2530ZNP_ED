@@ -475,21 +475,12 @@ void MT_SysReset( uint8 *pBuf )
  *****************************************************************************/
 static void MT_SysPing(void)
 {
-  uint16 tmp16;
-  uint8 retArray[2];
-
-  /* Build Capabilities */
-  tmp16 = MT_CAP_SYS | MT_CAP_MAC  | MT_CAP_NWK  | MT_CAP_AF    |
-          MT_CAP_ZDO | MT_CAP_SAPI | MT_CAP_UTIL | MT_CAP_DEBUG |
-          MT_CAP_APP | MT_CAP_GP   | MT_CAP_ZOAD | ((uint16)devState<<12);
-
-  /* Convert to high byte first into temp buffer */
-  retArray[0] = LO_UINT16( tmp16 );
-  retArray[1] = HI_UINT16( tmp16 );
+  uint8 retArray;
+  retArray = devState;
 
   /* Build and send back the response */
   MT_BuildAndSendZToolResponse( MT_SRSP_SYS, MT_SYS_PING,
-                                sizeof(retArray), retArray );
+                                sizeof(retArray), &retArray );
 }
 
 /******************************************************************************
@@ -503,6 +494,7 @@ static void MT_SysPing(void)
  *****************************************************************************/
 static void MT_SysVersion(void)
 {
+#if 0
 #if !defined( INCLUDE_REVISION_INFORMATION )
   /* Build and send back the default response */
   MT_BuildAndSendZToolResponse( MT_SRSP_SYS, MT_SYS_VERSION,
@@ -545,6 +537,7 @@ static void MT_SysVersion(void)
   /* Build and send back the response */
   MT_BuildAndSendZToolResponse( MT_SRSP_SYS, MT_SYS_VERSION,
                                 sizeof(verStr), verStr);
+#endif
 #endif
 }
 
@@ -1900,6 +1893,7 @@ static void MT_SysZDiagsSaveStatsToNV(void)
  *****************************************************************************/
 void MT_SysResetInd(void)
 {
+#if 0
   uint8 retArray[6];
 
   retArray[0] = ResetReason();   /* Reason */
@@ -1908,6 +1902,7 @@ void MT_SysResetInd(void)
   /* Send out Reset Response message */
   MT_BuildAndSendZToolResponse( MT_ARSP_SYS, MT_SYS_RESET_IND,
                                 sizeof(retArray), retArray);
+#endif
 }
 
 /******************************************************************************
