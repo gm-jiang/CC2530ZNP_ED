@@ -258,7 +258,7 @@ extern "C"
 
 // NV Items Reserved for applications (user applications)
 // 0x0401 – 0x0FFF
-
+#define NV_BEACON_REQUEST_DELAY    0x0401
 
 // ZCD_NV_STARTUP_OPTION values
 //   These are bit weighted - you can OR these together.

@@ -430,7 +430,7 @@ extern void ZDApp_SendEventMsg( uint8 cmd, uint8 len, uint8 *buf );
  * Start the network formation process
  *    delay - millisecond wait before
  */
-extern void ZDApp_NetworkInit( uint16 delay );
+extern void ZDApp_NetworkInit( uint32 delay );
 
 /*
  * Request a network discovery

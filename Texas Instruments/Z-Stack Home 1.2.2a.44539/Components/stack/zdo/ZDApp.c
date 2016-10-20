@@ -95,9 +95,7 @@
   #define EXTENDED_JOINING_RANDOM_MASK 0x007F
 #endif
 
-#if !defined( BEACON_REQUEST_DELAY )
-  #define BEACON_REQUEST_DELAY        100   // in milliseconds
-#endif
+uint32 g_beacon_request_delay = 0;    // in milliseconds
 
 #if !defined( BEACON_REQ_DELAY_MASK )
   #define BEACON_REQ_DELAY_MASK       0x007F
@@ -300,6 +298,11 @@ void ZDApp_Init( uint8 task_id )
 {
   // Save the task ID
   ZDAppTaskID = task_id;
+  uint32 beacon_request_delay = BEACON_REQUEST_DELAY_INIT;
+
+  /*init nv_beacon_request_delay*/
+  osal_nv_item_init(NV_BEACON_REQUEST_DELAY, sizeof(uint32), &beacon_request_delay);
+  osal_nv_read(NV_BEACON_REQUEST_DELAY, 0, sizeof(uint32), &g_beacon_request_delay);
 
   // Initialize the ZDO global device short address storage
   ZDAppNwkAddr.addrMode = Addr16Bit;
@@ -1290,24 +1293,25 @@ void ZDApp_ProcessOSALMsg( osal_event_hdr_t *msgPtr )
           if ( continueJoining )
           {
             zdoDiscCounter++;
-            if (devStartMode == MODE_REJOIN
-                && zdoDiscCounter > NUM_REJOIN_ATTEMPTS)
+            if (zdoDiscCounter > NUM_REJOIN_ATTEMPTS)
             {
-              /*devStartMode = MODE_JOIN;
-              osal_memset(ZDO_UseExtendedPANID, 0, Z_EXTADDR_LEN );
-              zdoDiscCounter = 1;
-              // Clear the neighbor Table and network discovery tables.
-              nwkNeighborInitTable();
-              NLME_NwkDiscTerm();*/
-              // Set the NV startup option to force a "new" join.
-              zgWriteStartupOptions( ZG_STARTUP_SET, ZCD_STARTOPT_DEFAULT_NETWORK_STATE );
-              SystemResetSoft();
+              zdoDiscCounter = 0;
+              if (g_beacon_request_delay < BEACON_REQUEST_DELAY_MAX)
+              {
+                g_beacon_request_delay += BEACON_REQUEST_DELAY_INC;
+                osal_nv_write(NV_BEACON_REQUEST_DELAY, 0, sizeof(uint32), &g_beacon_request_delay);
+              }
+              if (devStartMode == MODE_REJOIN)
+              {
+                zgWriteStartupOptions( ZG_STARTUP_SET, ZCD_STARTOPT_DEFAULT_NETWORK_STATE );
+                SystemResetSoft();
+              }
             }
 
 #if defined ( MANAGED_SCAN )
             ZDApp_NetworkInit( MANAGEDSCAN_DELAY_BETWEEN_SCANS );
 #else
-            ZDApp_NetworkInit( (uint16)(BEACON_REQUEST_DELAY
+            ZDApp_NetworkInit( (uint32)(g_beacon_request_delay
                                         + ((uint16)(osal_rand()& BEACON_REQ_DELAY_MASK))) );
 #endif
           }
@@ -3266,7 +3270,7 @@ void ZDApp_ChangeMatchDescRespPermission( uint8 endpoint, uint8 action )
  *
  * @return  none
  */
-void ZDApp_NetworkInit( uint16 delay )
+void ZDApp_NetworkInit( uint32 delay )
 {
   if ( delay )
   {
@@ -3783,6 +3787,14 @@ void ZDApp_ChangeState( devStates_t state )
 {
   if ( devState != state )
   {
+    if (state == DEV_END_DEVICE)
+    {
+      if(g_beacon_request_delay != BEACON_REQUEST_DELAY_INIT)
+      {
+        g_beacon_request_delay = BEACON_REQUEST_DELAY_INIT;
+        osal_nv_write(NV_BEACON_REQUEST_DELAY, 0, sizeof(uint32), &g_beacon_request_delay);
+      }
+    }
     devState = state;
     osal_set_event( ZDAppTaskID, ZDO_STATE_CHANGE_EVT );
   }
