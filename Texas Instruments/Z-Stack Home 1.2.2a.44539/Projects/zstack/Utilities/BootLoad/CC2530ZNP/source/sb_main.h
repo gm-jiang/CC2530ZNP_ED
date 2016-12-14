@@ -50,9 +50,6 @@
  * ------------------------------------------------------------------------------------------------
  */
 
-#define SB_RX(pCH)  sbRx((pCH), 1)
-#define SB_TX(pBUF, CNT)  sbTx((pBUF), (CNT))
-
 #define SRDY_SET()      (NP_RDYOut = 0)
 #define SRDY_CLR()      (NP_RDYOut = 1)
 
@@ -75,20 +72,11 @@
 #define NP_RDYOut        P0_4
 #define NP_RDYOut_BIT    BV(4)
 
-/* Needed by sb_exec.c (the same file is used for both CC2530 and CC2531),
-   buttons are not used in CC2530, but without this definition, sv_exec does not compile. */
-#define SB1_PRESS 0
 
 /* ------------------------------------------------------------------------------------------------
  *                                       Global Functions
  * ------------------------------------------------------------------------------------------------
  */
-
-uint16 sbRx(uint8 *buf, uint16 len);
-uint16 sbTx(uint8 *buf, uint16 len);
-void sbUartPoll(void);
-bool sblIsUartTxPending(void);
-void vddWait(uint8 vdd);
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -96,6 +84,5 @@ void vddWait(uint8 vdd);
  * ------------------------------------------------------------------------------------------------
  */
 
-extern uint8 sbStateReportingEnabled;
 
 #endif
