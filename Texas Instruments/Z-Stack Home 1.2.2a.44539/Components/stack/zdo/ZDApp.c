@@ -71,6 +71,7 @@
 #include "hal_lcd.h"
 #include "hal_key.h"
 
+
 #if defined( MT_MAC_FUNC ) || defined( MT_MAC_CB_FUNC )
   #error "ERROR! MT_MAC functionalities should be disabled on ZDO devices"
 #endif
@@ -186,7 +187,6 @@ ZDO_PendingBindReq_t *ZDAppPendingBindReq = NULL;
 #endif
 
 uint32 runtimeChannel;
-
 /*********************************************************************
  * EXTERNAL VARIABLES
  */

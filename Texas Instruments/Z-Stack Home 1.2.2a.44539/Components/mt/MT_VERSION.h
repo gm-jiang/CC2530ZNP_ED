@@ -44,6 +44,7 @@ extern "C"
 {
 #endif
 
+
 #if !defined ( INCLUDE_REVISION_INFORMATION )
 extern const uint8 MTVersionString[5];
 #else

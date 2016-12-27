@@ -49,6 +49,7 @@
 #include "nwk.h"
 #include "OnBoard.h"
 #include "MT_UART.h"
+#include "MT_VERSION.h"
 
 #if defined INTER_PAN
 #include "stub_aps.h"
@@ -97,6 +98,7 @@ typedef struct _mtAfInMsgList_t
   uint8 tick;
 } mtAfInMsgList_t;
 
+
 /* ------------------------------------------------------------------------------------------------
  *                                        Local Variables
  * ------------------------------------------------------------------------------------------------
@@ -135,7 +137,6 @@ static void MT_AfDataRetrieve(uint8 *pBuf);
 static void MT_AfDataStore(uint8 *pBuf);
 static void MT_AfAPSF_ConfigSet(uint8 *pBuf);
 static void MT_AfAPSF_ConfigGet(uint8 *pBuf);
-
 
 /**************************************************************************************************
  * @fn          MT_AfExec

@@ -258,6 +258,7 @@ static void powerOffSoc(void);
 #endif /* ENABLE_MT_SYS_RESET_SHUTDOWN */
 #endif /* MT_SYS_FUNC */
 
+static void MT_SysSetPollrate( uint8 *pBuf );
 #if defined( MT_SYS_FUNC )
 /******************************************************************************
  * @fn      MT_SysProcessing
@@ -422,6 +423,9 @@ uint8 MT_SysCommandProcessing(uint8 *pBuf)
       MT_SysZDiagsSaveStatsToNV();
       break;
 #endif /* FEATURE_SYSTEM_STATS */
+    case MT_SYS_SET_POLL_RATE:
+      MT_SysSetPollrate(pBuf);
+      break;
 
     default:
       status = MT_RPC_ERR_COMMAND_ID;
@@ -494,7 +498,7 @@ static void MT_SysPing(void)
  *****************************************************************************/
 static void MT_SysVersion(void)
 {
-#if 0
+#if 1
 #if !defined( INCLUDE_REVISION_INFORMATION )
   /* Build and send back the default response */
   MT_BuildAndSendZToolResponse( MT_SRSP_SYS, MT_SYS_VERSION,
@@ -1894,15 +1898,25 @@ static void MT_SysZDiagsSaveStatsToNV(void)
 void MT_SysResetInd(void)
 {
 #if 0
-  uint8 retArray[6];
-
-  retArray[0] = ResetReason();   /* Reason */
-  osal_memcpy( &retArray[1], MTVersionString, 5 );   /* Revision info */
+  uint16 softWare = get_sw_ver();
+  uint8 retArray[2];
+  retArray[0] = (softWare >> 8) & 0xff;
+  retArray[1] = softWare & 0xff;
 
   /* Send out Reset Response message */
   MT_BuildAndSendZToolResponse( MT_ARSP_SYS, MT_SYS_RESET_IND,
                                 sizeof(retArray), retArray);
 #endif
+}
+
+static void MT_SysSetPollrate( uint8 *pBuf )
+{
+  uint8 retArray = 0;
+  zgPollRate = pBuf[MT_RPC_POS_DAT0+1]*256 + pBuf[MT_RPC_POS_DAT0];
+  NLME_SetPollRate(zgPollRate);
+  /* Build and send back the response */
+  MT_BuildAndSendZToolResponse( MT_SRSP_SYS, MT_SYS_SET_POLL_RATE,
+                                sizeof(retArray), &retArray );
 }
 
 /******************************************************************************

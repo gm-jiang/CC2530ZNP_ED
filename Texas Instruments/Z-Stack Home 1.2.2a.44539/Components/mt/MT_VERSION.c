@@ -42,6 +42,7 @@
  *****************************************************************************/
 #include "ZComDef.h"
 #include "MT_VERSION.h"
+#include "MT.h"
 
 #if defined( INCLUDE_REVISION_INFORMATION )
 // The following include file, revision_info.h, shall be an auto-generated file. 
@@ -63,6 +64,10 @@
 #endif
 #endif
 
+uint16 get_version(uint8 *str);
+uint16 get_sw_ver(void);
+uint16 get_hw_ver(void);
+void MT_ZnpVersion(void);
 
 /******************************************************************************
  * CONSTANTS
@@ -81,6 +86,7 @@ const uint8 MTVersionString[] = {
                                    BOOTLOADER_BUILD_TYPE
 #endif
                                  };
+
 
 /******************************************************************************
  */
