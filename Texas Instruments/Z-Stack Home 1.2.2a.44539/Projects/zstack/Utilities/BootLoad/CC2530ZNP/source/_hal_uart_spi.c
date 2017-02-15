@@ -25,7 +25,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED “AS IS?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -49,6 +49,7 @@
 #include "hal_defs.h"
 #include "hal_mcu.h"
 #include "hal_uart.h"
+#include "sb_main.h"
 
 /*********************************************************************
  * MACROS
@@ -193,8 +194,8 @@ static uartSPICfg_t spiCfg;
  */
 
 static void HalUARTInitSPI(void);
-uint16 HalUARTReadSPI(uint8 *buf, uint16 len);
-uint16 HalUARTWriteSPI(uint8 *buf, uint16 len);
+uint16 HalUARTReadSPI(uint8 *buf, uint16 len, uint32 timeout);
+uint16 HalUARTWriteSPI(uint8 *buf, uint16 len, uint32 timeout);
 
 /******************************************************************************
  * @fn      HalUARTInitSPI
@@ -211,14 +212,10 @@ static void HalUARTInitSPI(void)
   UxGCR |= BV(5);
 
   /* Set UART1 I/O to alternate 2 location on P1 pins. */
-#if (HAL_UART_SPI == 1)
-  PERCFG &= ~HAL_UART_PERCFG_BIT;    // Set UART0 I/O location to P0.
-#else
   PERCFG |= HAL_UART_PERCFG_BIT;     // Set UART1 I/O location to P1.
 
   /* Give UART1 priority over Timer3. */
   P2SEL &= ~0x20;  /* PRI2P1 */
-#endif
 
   /* Mode select UART1 SPI Mode as slave. */
   UxCSR = CSR_SLAVE;
@@ -227,7 +224,6 @@ static void HalUARTInitSPI(void)
   PxSEL |= 0xF0;  /* SELP1_[7:4] */
 
   UxCSR |= CSR_RE;
-  URXxIE = 1;
 }
 
 /******************************************************************************
@@ -243,7 +239,7 @@ static void HalUARTUnInitSPI(void)
 {
   UxCSR = 0;
   URXxIE = 0;
-  IEN2 &= ~UTXxIE;  
+  IEN2 &= ~UTXxIE;
   UTXxIF = 1;
 }
 
@@ -258,60 +254,41 @@ static void HalUARTUnInitSPI(void)
  *
  * @return  length of buffer that was read
  *****************************************************************************/
-uint16 HalUARTReadSPI(uint8 *buf, uint16 len)
+uint16 HalUARTReadSPI(uint8 *buf, uint16 len, uint32 timeout)
 {
   uint16 cnt = 0;
+  UxDBUF = 0;
+  URXxIF = 0;
 
-  if ((spiCfg.rxHead == 0) && (spiCfg.rxHead == spiCfg.rxTail))
+  /*wait the MRDY SET with timeout*/
+  while (!MRDY_SET)
   {
-    uint8 tmp;
-
-    UxDBUF = 0;
-    URXxIF = 0;
-    // Slave signals ready for read by setting its ready flag first.
-    SRDY_SET();
-    while (!MRDY_SET);
-
-    do {
-      while (!URXxIF && MRDY_SET);
-      tmp = UxDBUF;
-      URXxIF = 0;
-
-      // Master ends slave read by clearing its ready flag first.
-      if (!MRDY_SET)
-      {
-        break;
-      }
-
-      spiCfg.rxBuf[spiCfg.rxTail] = tmp;
-      if (++spiCfg.rxTail >= HAL_UART_SPI_RX_MAX)
-      {
-        spiCfg.rxTail = 0;
-      }
-    } while(1);
-
-    // Master blocks waiting for slave to clear its ready flag before continuing.
-    SRDY_CLR();
-  }
-
-  while ((spiCfg.rxHead != spiCfg.rxTail) && (cnt < len))
-  {
-    *buf++ = spiCfg.rxBuf[spiCfg.rxHead++];
-    if (spiCfg.rxHead >= HAL_UART_SPI_RX_MAX)
+    if (timeout-- == 0)
     {
-      spiCfg.rxHead = 0;
+      return 0;
     }
-    cnt++;
   }
+  SRDY_SET();
 
-  if (cnt == 0)
+  /*receive data with timeout*/
+  while (MRDY_SET)
   {
-    spiCfg.rxHead = spiCfg.rxTail = 0;
+    if (timeout-- == 0) 
+    {
+      break;
+    }
+    if (URXxIF && (cnt < len))
+    {
+      URXxIF = 0;
+      *buf = UxDBUF;
+      buf++;
+      cnt++;
+    }
   }
+  SRDY_CLR();
 
   return cnt;
 }
-
 /******************************************************************************
  * @fn      HalUARTWriteSPI
  *
@@ -323,53 +300,40 @@ uint16 HalUARTReadSPI(uint8 *buf, uint16 len)
  *
  * @return  length of the buffer that was sent
  *****************************************************************************/
-uint16 HalUARTWriteSPI(uint8 *buf, uint16 len)
+uint16 HalUARTWriteSPI(uint8 *buf, uint16 len, uint32 timeout)
 {
-  uint16 cnt;
-
-  // Enforce all or none and at least one.
-  if ((HAL_UART_SPI_TX_AVAIL() < len) || (len == 0))
-  {
-    return 0;
-  }
-
-  UxDBUF = *buf++;
-  for (cnt = 1; cnt < len; cnt++)
-  {
-    spiCfg.txBuf[spiCfg.txTail] = *buf++;
-
-    if (spiCfg.txTail >= HAL_UART_SPI_TX_MAX-1)
-    {
-      spiCfg.txTail = 0;
-    }
-    else
-    {
-      spiCfg.txTail++;
-    }
-  }
-
+  uint16 cnt = 1;
   URXxIF = 0;
-  // Master signals ready for slave write by setting its ready flag first.
-  while (!MRDY_SET);
-  // Master blocks waiting for slave to set its ready flag before continuing.
+
+  UxDBUF = *buf;
+  buf++;
+
   SRDY_SET();
-
-  do {
-    while (!URXxIF && MRDY_SET);
-    UxDBUF = spiCfg.txBuf[spiCfg.txHead];
-    URXxIF = 0;
-
-    if (spiCfg.txHead == spiCfg.txTail)
+  /*wait the MRDY SET with timeout*/
+  while (!MRDY_SET)
+  {
+    if (timeout-- == 0)
     {
-      spiCfg.txBuf[spiCfg.txHead] = 0;
+      SRDY_CLR();
+      return 0;
     }
-    else if (++spiCfg.txHead >= HAL_UART_SPI_TX_MAX)
-    {
-      spiCfg.txHead = 0;
-    }
-  } while(MRDY_SET);  // Master ends slave write by clearing its ready flag first.
+  }
 
-  // Master blocks waiting for slave to set its ready flag before continuing.
+  /*send data with timeout*/
+  while (MRDY_SET)
+  {
+    if (timeout-- == 0)
+    {
+      break;
+    }
+    if (URXxIF)
+    {
+      URXxIF = 0;
+      UxDBUF = *buf;
+      buf++;
+      cnt++;
+    }
+  }
   SRDY_CLR();
 
   return cnt;

@@ -748,7 +748,7 @@
       <archiveVersion>1</archiveVersion>
       <data>
         <prebuild></prebuild>
-        <postbuild></postbuild>
+        <postbuild>"C:\CC2530ZNP_ED\Texas Instruments\Z-Stack Home 1.2.2a.44539\Projects\zstack\Tools\CC2530DB\oad.exe" "C:\CC2530ZNP_ED\Texas Instruments\Z-Stack Home 1.2.2a.44539\Projects\zstack\ZNP\CC253x\CC2530-Debug\Exe\CC2530.sim" "C:\CC2530ZNP_ED\Texas Instruments\Z-Stack Home 1.2.2a.44539\Projects\zstack\ZNP\CC253x\CC2530-Debug\Exe\CC2530.bin"</postbuild>
       </data>
     </settings>
     <settings>
@@ -764,11 +764,11 @@
         </option>
         <option>
           <name>XOutOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OutputFile</name>
-          <state>CC2530.d51</state>
+          <state>CC2530.hex</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -834,7 +834,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>f8w2530.xcl</state>
+          <state>C:\CC2530ZNP_ED\Texas Instruments\Z-Stack Home 1.2.2a.44539\Projects\zstack\Tools\CC2530DB\cc2530-sb.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -942,7 +942,7 @@
         </option>
         <option>
           <name>DebugInformation</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>RuntimeControl</name>
@@ -954,11 +954,11 @@
         </option>
         <option>
           <name>AllowExtraOutput</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GenerateExtraOutput</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XExtraOutOverride</name>

@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>2</archiveVersion>
+      <archiveVersion>3</archiveVersion>
       <data>
-        <version>7</version>
+        <version>8</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -274,6 +274,10 @@
           <name>UseMDU</name>
           <state></state>
         </option>
+        <option>
+          <name>AdditionalDriver</name>
+          <state></state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -300,9 +304,6 @@
           <name>CCDefines</name>
           <state>HAL_SB_BOOT_CODE</state>
           <state>HAL_UART_SPI=2</state>
-          <state>LOCK_THE_BOOT_IMAGE_PAGES_IN_HEX_FILE</state>
-          <state>SBL_WAIT_TIME=60</state>
-          <state>NO_WD_RESET_FOR_BOOTLOADER</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -712,6 +713,7 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
+        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -731,7 +733,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>19</version>
+        <version>21</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -1055,6 +1057,26 @@
           <name>XLink DPC Address</name>
           <state>1</state>
         </option>
+        <option>
+          <name>XlinkLogEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogInputFiles</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogModuleSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogPrintfScanf</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogSegmentSelection</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -1096,19 +1118,13 @@
   <group>
     <name>App</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\..\Components\osal\include\comdef.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\Source\sb_exec_v2.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\Source\sb_exec_v2.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\source\sb_main.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\source\sb_main.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\ymodem.c</name>
     </file>
   </group>
   <group>
