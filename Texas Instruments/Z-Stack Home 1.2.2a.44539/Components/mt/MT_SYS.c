@@ -81,6 +81,8 @@
  * MACROS
  *****************************************************************************/
 
+#define OFFLINE_DETECT 10000
+
 /* RPC_CMD responses for MT_SYS commands */
 #define MT_ARSP_SYS ((uint8)MT_RPC_CMD_AREQ | (uint8)MT_RPC_SYS_SYS)
 #define MT_SRSP_SYS ((uint8)MT_RPC_CMD_SRSP | (uint8)MT_RPC_SYS_SYS)
@@ -1914,6 +1916,10 @@ static void MT_SysSetPollrate( uint8 *pBuf )
   uint8 retArray = 0;
   zgPollRate = pBuf[MT_RPC_POS_DAT0+1]*256 + pBuf[MT_RPC_POS_DAT0];
   NLME_SetPollRate(zgPollRate);
+  if ((zgPollRate != 0) && (zgPollRate <= OFFLINE_DETECT))
+  {
+    zgMaxPollFailureRetries = OFFLINE_DETECT/zgPollRate;
+  }
   /* Build and send back the response */
   MT_BuildAndSendZToolResponse( MT_SRSP_SYS, MT_SYS_SET_POLL_RATE,
                                 sizeof(retArray), &retArray );
